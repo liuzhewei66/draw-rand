@@ -1,17 +1,18 @@
 # draw-rand
 simple random lottery draw tool, support custom participants and prize settings
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog  # 全部放顶部
+from tkinter import filedialog, messagebox, simpledialog
 import random
 
 class LotteryTool:
     def __init__(self, root):
         self.root = root
-        self.root.title("随机抽奖工具")
+        self.root.title("随机抽奖工具（不重复中奖版）")
         self.root.geometry("520x420")
 
         # 数据存储
-        self.name_list = []
+        self.name_list = []       # 未中奖名单
+        self.win_list = []        # 已中奖名单（防止重复）
         self.is_running = False
         self.current_name = ""
 
@@ -36,7 +37,7 @@ class LotteryTool:
         self.stop_btn.grid(row=0, column=1, padx=10)
 
         # 名单数量提示
-        self.info_label = tk.Label(root, text=f"当前名单总数：{len(self.name_list)} 人")
+        self.info_label = tk.Label(root, text=f"当前可抽奖：{len(self.name_list)} 人 | 已中奖：{len(self.win_list)} 人")
         self.info_label.pack(pady=15)
 
     # 导入txt文件，一行一个姓名
@@ -53,25 +54,25 @@ class LotteryTool:
         except Exception as e:
             messagebox.showerror("错误", f"读取失败：{str(e)}")
 
-    # 手动弹窗添加姓名
+    # 手动弹窗添加姓名（绑定主窗口，不遮挡、置顶）
     def add_manually(self):
-        # 直接用 simpledialog，不用 tk.simpledialog
-        name = simpledialog.askstring("添加人员", "输入姓名：")
+        name = simpledialog.askstring("添加人员", "输入姓名：", parent=self.root)
         if name and name.strip():
             self.name_list.append(name.strip())
             self.update_count()
 
     # 更新人数显示
     def update_count(self):
-        self.info_label.config(text=f"当前名单总数：{len(self.name_list)} 人")
+        self.info_label.config(text=f"当前可抽奖：{len(self.name_list)} 人 | 已中奖：{len(self.win_list)} 人")
 
     # 清空所有名单
     def clear_all(self):
         self.name_list.clear()
+        self.win_list.clear()
         self.show_label.config(text="等待开始抽奖")
         self.update_count()
 
-    # 滚动名字
+    # 滚动名字（只从未中奖名单里随机）
     def roll_name(self):
         if not self.is_running or len(self.name_list) == 0:
             return
@@ -82,19 +83,26 @@ class LotteryTool:
     # 开始抽奖
     def start_roll(self):
         if len(self.name_list) == 0:
-            messagebox.showwarning("提醒", "请先导入或添加抽奖名单！")
+            messagebox.showwarning("提醒", "可抽奖人员已为空！")
             return
         self.is_running = True
         self.start_btn.config(state=tk.DISABLED)
         self.stop_btn.config(state=tk.NORMAL)
         self.roll_name()
 
-    # 停止开奖
+    # 停止开奖（中奖后自动移除，不重复中奖）
     def stop_roll(self):
         self.is_running = False
         self.start_btn.config(state=tk.NORMAL)
         self.stop_btn.config(state=tk.DISABLED)
+
+        # 核心：中奖后从候选名单移除，加入已中奖名单
+        if self.current_name and self.current_name in self.name_list:
+            self.name_list.remove(self.current_name)
+            self.win_list.append(self.current_name)
+
         messagebox.showinfo("中奖结果", f"恭喜：{self.current_name}！")
+        self.update_count()
 
 if __name__ == "__main__":
     win = tk.Tk()
