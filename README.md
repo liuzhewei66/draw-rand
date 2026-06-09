@@ -1,7 +1,7 @@
 # draw-rand
 simple random lottery draw tool, support custom participants and prize settings
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog  # 全部放顶部
 import random
 
 class LotteryTool:
@@ -55,7 +55,8 @@ class LotteryTool:
 
     # 手动弹窗添加姓名
     def add_manually(self):
-        name = tk.simpledialog.askstring("添加人员", "输入姓名：")
+        # 直接用 simpledialog，不用 tk.simpledialog
+        name = simpledialog.askstring("添加人员", "输入姓名：")
         if name and name.strip():
             self.name_list.append(name.strip())
             self.update_count()
@@ -94,9 +95,6 @@ class LotteryTool:
         self.start_btn.config(state=tk.NORMAL)
         self.stop_btn.config(state=tk.DISABLED)
         messagebox.showinfo("中奖结果", f"恭喜：{self.current_name}！")
-
-# 缺少simpledialog补导入
-from tkinter import simpledialog
 
 if __name__ == "__main__":
     win = tk.Tk()
