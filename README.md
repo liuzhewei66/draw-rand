@@ -94,8 +94,7 @@ class LotteryTool:
         self.start_btn.config(state=tk.NORMAL)
         self.stop_btn.config(state=tk.DISABLED)
         messagebox.showinfo("中奖结果", f"恭喜：{self.current_name}！")
-
-# 缺少simpledialog补导入
+        
 from tkinter import simpledialog
 
 if __name__ == "__main__":
